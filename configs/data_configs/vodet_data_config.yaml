@@ -1,0 +1,32 @@
+input_size: [512, 320] # W, H
+class_names: ['car', 'pil', 'ride', 'lock', 'col', 'con', 'per']
+multi_index: [0, 1, 2]
+multi_pts_num: [4, 3, 2]
+downsample_ratio: 4 # manually set for label related operation, not for network
+
+preprocess: # y = x - mean / std in BGR order
+  mean: [103.53, 116.28, 123.675]
+  std: [57.375, 57.12, 58.395]
+
+data_aug:
+  affine_p: 1.0 # Random Crop增强的概率
+  min_scale: 0.6 # 随机放缩的最小尺度系数
+  max_scale: 1.4 # 随机放缩的最大尺度系数
+  color_p: 1.0 # 随机色彩类增强的概率
+  rot: 0.0 # 旋转的角度
+  rot180_p: 0.0 # 随机旋转180度的概率
+  flip_p: 0.5 # 随机做左右翻转的概率
+  flip_idx: [[[0, 1], [2, 3]], [[0, 2]], []]
+  gauss_blur_p: 0.0 # 随机做gauss模糊的概率
+  copy_paste_p: 0.0 # 随机做copypaste的概率
+  mixup_p: 0.0 # 随机做mixup的概率
+  overlay_p: 0.5 # 上下叠加的概率
+  fr_resize_r: 1.5 # 单视图的高度方向缩放倍数 800 * 1.5 = 1200
+  lr_resize_r: 0.75 # 叠加图的高度方向缩放倍数 800 * 0.75 = 600
+  fr_crop_s: 400 # 单视图的高度方向crop像素数 1200 - 400 = 800
+  lr_crop_s: 200 # 叠加图的高度方向crop像素数 600 - 200 = 400
+  crop_min_s: 10 # crop之后被截断物体的最小保留高度
+
+data_filter:
+  area_size: [20.48, 20.48, 20.48, 2.25, 2.25, 2.25, 20.48] # in the scale of 128x80
+  area_ratio: [0.33, 0.33, 0.33, 0.67, 0.67, 0.67, 0.67] # the cliped area ratio should lower it

@@ -1,0 +1,24 @@
+model: res18_c5_dlaup
+optimizer: adam # [sgd, adam]
+
+parameter:
+        heads:
+                'hm': 7
+                'wh': 2
+                'reg': 2
+                'hps_coord': 8
+                'hps_conf': 4
+                'hm_hp_car': 4
+                'hm_hp_pil': 3
+                'hm_hp_ride': 2
+                'hm_hp_offset': 2
+        channel_reduce_ratio: 0.75
+
+loss_weight:
+        hm_focal_loss_weight: 1.0
+        wh_loss_weight: 0.1
+        reg_loss_weight: 1.0
+        hps_coord_loss_weight: 1.0
+        hps_conf_loss_weight: 1.0
+        hm_hp_loss_weight: 1.0
+        hm_hp_offset_loss_weight: 1.0
