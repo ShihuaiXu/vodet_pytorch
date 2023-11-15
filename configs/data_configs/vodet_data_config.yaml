@@ -1,8 +1,9 @@
 input_size: [512, 320] # W, H
-class_names: ['car', 'pil', 'ride', 'lock', 'col', 'con', 'per']
-multi_index: [0, 1, 2]
-multi_pts_num: [4, 3, 2]
-pts_center_index: [1] # pil use kps center
+class_names: ['car', 'pil3', 'pil2',  'pily', 'ride', 'lock', 'col', 'con', 'per']
+multi_index: [0, 1, 2, 3, 4]
+multi_pts_num: [4, 3, 2, 2, 2]
+pts_center_index: [1, 2] # pil use kps center
+multi_heat_index: [0]
 downsample_ratio: 4 # manually set for label related operation, not for network
 
 preprocess: # y = x - mean / std in BGR order
@@ -17,7 +18,7 @@ data_aug:
   rot: 0.0 # 旋转的角度
   rot180_p: 0.0 # 随机旋转180度的概率
   flip_p: 0.5 # 随机做左右翻转的概率
-  flip_idx: [[[0, 1], [2, 3]], [[0, 2]], []]
+  flip_idx: [[[0, 1], [2, 3]], [[0, 2]], [[0, 1]], [[0, 1]], []]
   gauss_blur_p: 0.0 # 随机做gauss模糊的概率
   copy_paste_p: 0.0 # 随机做copypaste的概率
   mixup_p: 0.0 # 随机做mixup的概率
@@ -29,5 +30,5 @@ data_aug:
   crop_min_s: 10 # crop之后被截断物体的最小保留高度
 
 data_filter:
-  area_size: [20.48, 20.48, 20.48, 2.25, 2.25, 2.25, 20.48] # in the scale of 128x80
-  area_ratio: [0.33, 0.33, 0.33, 0.67, 0.67, 0.67, 0.67] # the cliped area ratio should lower it
+  area_size: [20.48, 20.48, 20.48, 20.48, 20.48, 2.25, 2.25, 2.25, 20.48] # in the scale of 128x80
+  area_ratio: [0.33, 0.33, 0.33, 0.33, 0.33, 0.67, 0.67, 0.67, 0.67] # the cliped area ratio should lower it

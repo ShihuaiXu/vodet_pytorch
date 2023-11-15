@@ -111,22 +111,39 @@ class Vodet_Dataset(Dataset):
 
         hps_coord = [np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32),
                      np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32),
+                     np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32),
+                     np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32),
                      np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32)]
+
         hps_ind = [np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32),
                    np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32),
+                   np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32),
+                   np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32),
                    np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32)]
+
         hps_vis_ind = [np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32),
                        np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32),
+                       np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32),
+                       np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32),
                        np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32)]
+
         hps_unvis_ind = [np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32),
                          np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32),
+                         np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32),
+                         np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32),
                          np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32)]
+
         for name, pt_num in zip(self.multi_names, self.multi_pts_num):
             vars()['hm_hp_' + name] = np.zeros((pt_num, output_h, output_w), dtype=np.float32)
         hm_hp_ind = [np.zeros((2, output_h, output_w), dtype=np.float32),
                      np.zeros((2, output_h, output_w), dtype=np.float32),
+                     np.zeros((2, output_h, output_w), dtype=np.float32),
+                     np.zeros((2, output_h, output_w), dtype=np.float32),
                      np.zeros((2, output_h, output_w), dtype=np.float32)]
+
         hm_hp_offset = [np.zeros((2, output_h, output_w), dtype=np.float32),
+                        np.zeros((2, output_h, output_w), dtype=np.float32),
+                        np.zeros((2, output_h, output_w), dtype=np.float32),
                         np.zeros((2, output_h, output_w), dtype=np.float32),
                         np.zeros((2, output_h, output_w), dtype=np.float32)]
         ##############################
