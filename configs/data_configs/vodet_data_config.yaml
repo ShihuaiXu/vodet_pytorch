@@ -5,6 +5,7 @@ multi_pts_num: [4, 3, 2, 2, 2]
 pts_center_index: [1, 2] # pil use kps center
 multi_heat_index: [0]
 downsample_ratio: 4 # manually set for label related operation, not for network
+use_multi_center: True
 
 preprocess: # y = x - mean / std in BGR order
   mean: [103.53, 116.28, 123.675]
