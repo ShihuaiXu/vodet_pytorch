@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 from dataset.vodet_dataset import Vodet_Dataset
 from models import get_model
 from Trainer import Trainer
-from utils.utils import save_model
+from utils.utils import load_model, save_model
 from utils.logger import Logger
 
 parser = argparse.ArgumentParser(description='vodet pytorch train parser')
@@ -93,6 +93,11 @@ def train():
     elif net_args['optimizer'] == 'adam':
         optimizer = torch.optim.Adam(model.parameters(), args.lr)
     ##############################
+    # resume the model
+    start_epoch = 0
+    if args.load_model != '':
+        model, optimizer, start_epoch = load_model(model, args.load_model, optimizer, args.resume, args.lr, args.lr_step)
+    ##############################
     # follow the centernet setting, related to multi GPU training
     master_batch_size = args.batch_size // len(args.gpus)
     rest_batch_size = (args.batch_size - master_batch_size)
@@ -110,7 +115,6 @@ def train():
     # epoch loop
     print('Starting training...')
     best = 1e10
-    start_epoch = 0
     num_epochs = args.num_epochs
     for epoch in range(start_epoch + 1, num_epochs + 1):
         mark = epoch if args.save_all else 'last'
