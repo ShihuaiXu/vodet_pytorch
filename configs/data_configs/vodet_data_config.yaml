@@ -2,6 +2,7 @@ input_size: [512, 320] # W, H
 class_names: ['car', 'pil', 'ride', 'lock', 'col', 'con', 'per']
 multi_index: [0, 1, 2]
 multi_pts_num: [4, 3, 2]
+pts_center_index: [1] # pil use kps center
 downsample_ratio: 4 # manually set for label related operation, not for network
 
 preprocess: # y = x - mean / std in BGR order
