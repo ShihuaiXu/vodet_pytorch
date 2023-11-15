@@ -28,6 +28,7 @@ class Vodet_Dataset(Dataset):
         self.multi_names = [self.class_names[x] for x in self.multi_index]
         self.multi_pts_num = data_args['multi_pts_num']
         self.max_pts_num = max(data_args['multi_pts_num'])
+        self.pts_center_index = data_args['pts_center_index']
         self.cat_ids = {i + 1: i for i, v in enumerate(data_args['class_names'])}
         if split == 'train':
             self.annot_path = data_args['json_train_file']
@@ -131,30 +132,62 @@ class Vodet_Dataset(Dataset):
         ##############################
         for i, (bbox, pt, label) in enumerate(zip(bboxes, pts, labels)):
             if label in self.multi_index:
-                ct = np.array([(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2], dtype=np.float32)
-                ct_int = ct.astype(np.int32)
-                center_x, center_y = ct_int
-                hm_ind[:, center_y, center_x] = 1
-                h, w = bbox[3] - bbox[1], bbox[2] - bbox[0]
-                wh[:, center_y, center_x] = w, h
-                reg[:, center_y, center_x] = ct - ct_int
-                radius = gaussian_radius((math.ceil(h), math.ceil(w)))
-                radius = max(0, int(radius))
-                draw_gaussian(hm[label], ct_int, radius)
+                if label in self.pts_center_index:
+                    pt_sum_x, pt_sum_y, count = 0, 0, 0
+                    for j in range(len(pt)):
+                        if pt[j][2] == 2:
+                            pt_sum_x += pt[j][0]
+                            pt_sum_y += pt[j][1]
+                            count += 1
+                    if count >= 2:
+                        ct = np.array([pt_sum_x / count, pt_sum_y / count], dtype=np.float32)
+                        ct_int = ct.astype(np.int32)
+                        center_x, center_y = ct_int
+                        hm_ind[:, center_y, center_x] = 1
+                        h, w = bbox[3] - bbox[1], bbox[2] - bbox[0]
+                        reg[:, center_y, center_x] = ct - ct_int
+                        radius = gaussian_radius((math.ceil(h), math.ceil(w)))
+                        radius = max(0, int(radius))
+                        draw_gaussian(hm[label], ct_int, radius)
 
-                num_pt = pt.shape[0]
-                pt_int = pt.astype(np.int32)
-                for j in range(0, max_pts_num):
-                    if j < num_pt and pt[j][2] != 0:
-                        hps_coord[label][j * 2, center_y, center_x] = pt[j][0] - center_x
-                        hps_coord[label][j * 2 + 1, center_y, center_x] = pt[j][1] - center_y
-                        hps_ind[label][j * 2: j * 2 + 2, center_y, center_x] = 1
-                        hps_vis_ind[label][j, center_y, center_x] = 1
-                        draw_gaussian(vars()['hm_hp_' + self.class_names[label]][j], pt_int[j, :2], radius)
-                        hm_hp_offset[label][:, pt_int[j, 1], pt_int[j, 0]] = pt[j, :2] - pt_int[j, :2]
-                        hm_hp_ind[label][:, pt_int[j, 1], pt_int[j, 0]] = 1
-                    else:
-                        hps_unvis_ind[label][j, center_y, center_x] = 1
+                        num_pt = pt.shape[0]
+                        pt_int = pt.astype(np.int32)
+                        for k in range(0, max_pts_num):
+                            if k < num_pt and pt[k][2] != 0:
+                                hps_coord[label][k * 2, center_y, center_x] = pt[k][0] - center_x
+                                hps_coord[label][k * 2 + 1, center_y, center_x] = pt[k][1] - center_y
+                                hps_ind[label][k * 2: k * 2 + 2, center_y, center_x] = 1
+                                hps_vis_ind[label][k, center_y, center_x] = 1
+                                draw_gaussian(vars()['hm_hp_' + self.class_names[label]][k], pt_int[k, :2], radius)
+                                hm_hp_offset[label][:, pt_int[k, 1], pt_int[k, 0]] = pt[k, :2] - pt_int[k, :2]
+                                hm_hp_ind[label][:, pt_int[k, 1], pt_int[k, 0]] = 1
+                            else:
+                                hps_unvis_ind[label][k, center_y, center_x] = 1
+                else:
+                    ct = np.array([(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2], dtype=np.float32)
+                    ct_int = ct.astype(np.int32)
+                    center_x, center_y = ct_int
+                    hm_ind[:, center_y, center_x] = 1
+                    h, w = bbox[3] - bbox[1], bbox[2] - bbox[0]
+                    wh[:, center_y, center_x] = w, h
+                    reg[:, center_y, center_x] = ct - ct_int
+                    radius = gaussian_radius((math.ceil(h), math.ceil(w)))
+                    radius = max(0, int(radius))
+                    draw_gaussian(hm[label], ct_int, radius)
+
+                    num_pt = pt.shape[0]
+                    pt_int = pt.astype(np.int32)
+                    for j in range(0, max_pts_num):
+                        if j < num_pt and pt[j][2] != 0:
+                            hps_coord[label][j * 2, center_y, center_x] = pt[j][0] - center_x
+                            hps_coord[label][j * 2 + 1, center_y, center_x] = pt[j][1] - center_y
+                            hps_ind[label][j * 2: j * 2 + 2, center_y, center_x] = 1
+                            hps_vis_ind[label][j, center_y, center_x] = 1
+                            draw_gaussian(vars()['hm_hp_' + self.class_names[label]][j], pt_int[j, :2], radius)
+                            hm_hp_offset[label][:, pt_int[j, 1], pt_int[j, 0]] = pt[j, :2] - pt_int[j, :2]
+                            hm_hp_ind[label][:, pt_int[j, 1], pt_int[j, 0]] = 1
+                        else:
+                            hps_unvis_ind[label][j, center_y, center_x] = 1
             else:
                 ct = np.array([(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2], dtype=np.float32)
                 ct_int = ct.astype(np.int32)
@@ -166,6 +199,7 @@ class Vodet_Dataset(Dataset):
                 radius = gaussian_radius((math.ceil(h), math.ceil(w)))
                 radius = max(0, int(radius))
                 draw_gaussian(hm_det[label - len(self.multi_index)], ct_int, radius)
+
         ret = {'hm': hm, 'hm_ind': hm_ind, 'wh': wh, 'reg': reg, 'hm_det': hm_det, 'hm_det_ind': hm_det_ind,
                'hps_ind': hps_ind, 'hps_vis_ind': hps_vis_ind, 'hps_unvis_ind': hps_unvis_ind, 'wh_det': wh_det,
                'reg_det': reg_det, 'hps_coord': hps_coord, 'hps_ind': hps_ind, 'hm_hp_offset': hm_hp_offset,
