@@ -90,7 +90,7 @@ class Vodet_Dataset(Dataset):
             img_data, bboxes, pts = self.flip(img_data, bboxes, pts, labels, c)
         if np.random.random() < self.affine_p:
             img_data, bboxes, pts, labels = self.AffineAugmentation(img_data, bboxes, pts, labels, c, s)
-        self.visualize_label(img_data, file_name, bboxes, pts, labels)
+        # self.visualize_label(img_data, file_name, bboxes, pts, labels)
         return img_data, bboxes, pts, labels
 
     # put the label to the feature map
