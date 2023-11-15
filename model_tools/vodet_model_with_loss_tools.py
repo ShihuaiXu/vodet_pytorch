@@ -33,8 +33,8 @@ class Vodet_ModleWithLoss(torch.nn.Module):
         hps_coord_loss, hps_conf_loss, hm_hp_loss, hm_hp_off_loss = 0, 0, 0, 0
 
         output['hm'] = sigmoid(output['hm'])
-        hm_loss += self.hm_focal_loss(output['hm'][:, :5, :, :], batch['hm'])
-        hm_det_loss += self.hm_focal_loss(output['hm'][:, 5:, :, :], batch['hm_det']) * 1.5
+        hm_loss += self.hm_focal_loss(output['hm'][:, :len(self.multi_index), :, :], batch['hm'])
+        hm_det_loss += self.hm_focal_loss(output['hm'][:, len(self.multi_index):, :, :], batch['hm_det']) * 1.5
 
         for name in self.multi_heat_names:
             output['hm_hp_' + name] = sigmoid(output['hm_hp_' + name])
