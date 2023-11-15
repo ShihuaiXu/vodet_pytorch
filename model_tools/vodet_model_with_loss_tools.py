@@ -58,10 +58,6 @@ class Vodet_ModleWithLoss(torch.nn.Module):
         hps_conf_loss += self.hps_conf_ce_loss(output['hps_conf'], batch['hps_vis_ind'][4], batch['hps_unvis_ind'][4])
 
         hm_hp_off_loss += self.hps_l1_loss(output['hm_hp_offset'], batch['hm_hp_offset'][0], batch['hm_hp_ind'][0])
-        hm_hp_off_loss += self.hps_l1_loss(output['hm_hp_offset'], batch['hm_hp_offset'][1], batch['hm_hp_ind'][1])
-        hm_hp_off_loss += self.hps_l1_loss(output['hm_hp_offset'], batch['hm_hp_offset'][2], batch['hm_hp_ind'][2])
-        hm_hp_off_loss += self.hps_l1_loss(output['hm_hp_offset'], batch['hm_hp_offset'][3], batch['hm_hp_ind'][3])
-        hm_hp_off_loss += self.hps_l1_loss(output['hm_hp_offset'], batch['hm_hp_offset'][4], batch['hm_hp_ind'][4])
 
         loss = hm_loss * self.hm_focal_loss_weight + wh_loss * self.wh_loss_weight + reg_loss * self.reg_loss_weight + \
                hm_det_loss * self.hm_focal_loss_weight + wh_det_loss * self.wh_loss_weight + \

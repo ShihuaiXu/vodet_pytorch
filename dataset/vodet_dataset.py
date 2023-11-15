@@ -29,6 +29,9 @@ class Vodet_Dataset(Dataset):
         self.multi_pts_num = data_args['multi_pts_num']
         self.max_pts_num = max(data_args['multi_pts_num'])
         self.pts_center_index = data_args['pts_center_index']
+        self.multi_heat_index = data_args['multi_heat_index']
+        self.multi_heat_names = [self.class_names[x] for x in self.multi_heat_index]
+        self.multi_heat_pts_num = [self.multi_pts_num[x] for x in self.multi_heat_index]
         self.cat_ids = {i + 1: i for i, v in enumerate(data_args['class_names'])}
         if split == 'train':
             self.annot_path = data_args['json_train_file']
@@ -133,19 +136,10 @@ class Vodet_Dataset(Dataset):
                          np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32),
                          np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32)]
 
-        for name, pt_num in zip(self.multi_names, self.multi_pts_num):
+        for name, pt_num in zip(self.multi_heat_names, self.multi_heat_pts_num):
             vars()['hm_hp_' + name] = np.zeros((pt_num, output_h, output_w), dtype=np.float32)
-        hm_hp_ind = [np.zeros((2, output_h, output_w), dtype=np.float32),
-                     np.zeros((2, output_h, output_w), dtype=np.float32),
-                     np.zeros((2, output_h, output_w), dtype=np.float32),
-                     np.zeros((2, output_h, output_w), dtype=np.float32),
-                     np.zeros((2, output_h, output_w), dtype=np.float32)]
-
-        hm_hp_offset = [np.zeros((2, output_h, output_w), dtype=np.float32),
-                        np.zeros((2, output_h, output_w), dtype=np.float32),
-                        np.zeros((2, output_h, output_w), dtype=np.float32),
-                        np.zeros((2, output_h, output_w), dtype=np.float32),
-                        np.zeros((2, output_h, output_w), dtype=np.float32)]
+        hm_hp_ind = [np.zeros((2, output_h, output_w), dtype=np.float32)]
+        hm_hp_offset = [np.zeros((2, output_h, output_w), dtype=np.float32)]
         ##############################
         for i, (bbox, pt, label) in enumerate(zip(bboxes, pts, labels)):
             if label in self.multi_index:
@@ -175,9 +169,10 @@ class Vodet_Dataset(Dataset):
                                 hps_coord[label][k * 2 + 1, center_y, center_x] = pt[k][1] - center_y
                                 hps_ind[label][k * 2: k * 2 + 2, center_y, center_x] = 1
                                 hps_vis_ind[label][k, center_y, center_x] = 1
-                                draw_gaussian(vars()['hm_hp_' + self.class_names[label]][k], pt_int[k, :2], radius)
-                                hm_hp_offset[label][:, pt_int[k, 1], pt_int[k, 0]] = pt[k, :2] - pt_int[k, :2]
-                                hm_hp_ind[label][:, pt_int[k, 1], pt_int[k, 0]] = 1
+                                if label in self.multi_heat_index:
+                                    draw_gaussian(vars()['hm_hp_' + self.class_names[label]][j], pt_int[j, :2], radius)
+                                    hm_hp_offset[label][:, pt_int[k, 1], pt_int[k, 0]] = pt[k, :2] - pt_int[k, :2]
+                                    hm_hp_ind[label][:, pt_int[k, 1], pt_int[k, 0]] = 1
                             else:
                                 hps_unvis_ind[label][k, center_y, center_x] = 1
                 else:
@@ -200,9 +195,10 @@ class Vodet_Dataset(Dataset):
                             hps_coord[label][j * 2 + 1, center_y, center_x] = pt[j][1] - center_y
                             hps_ind[label][j * 2: j * 2 + 2, center_y, center_x] = 1
                             hps_vis_ind[label][j, center_y, center_x] = 1
-                            draw_gaussian(vars()['hm_hp_' + self.class_names[label]][j], pt_int[j, :2], radius)
-                            hm_hp_offset[label][:, pt_int[j, 1], pt_int[j, 0]] = pt[j, :2] - pt_int[j, :2]
-                            hm_hp_ind[label][:, pt_int[j, 1], pt_int[j, 0]] = 1
+                            if label in self.multi_heat_index:
+                                draw_gaussian(vars()['hm_hp_' + self.class_names[label]][j], pt_int[j, :2], radius)
+                                hm_hp_offset[label][:, pt_int[j, 1], pt_int[j, 0]] = pt[j, :2] - pt_int[j, :2]
+                                hm_hp_ind[label][:, pt_int[j, 1], pt_int[j, 0]] = 1
                         else:
                             hps_unvis_ind[label][j, center_y, center_x] = 1
             else:
@@ -221,7 +217,7 @@ class Vodet_Dataset(Dataset):
                'hps_ind': hps_ind, 'hps_vis_ind': hps_vis_ind, 'hps_unvis_ind': hps_unvis_ind, 'wh_det': wh_det,
                'reg_det': reg_det, 'hps_coord': hps_coord, 'hps_ind': hps_ind, 'hm_hp_offset': hm_hp_offset,
                'hm_hp_ind': hm_hp_ind}
-        for name, pt_num in zip(self.multi_names, self.multi_pts_num):
+        for name in self.multi_heat_names:
             ret.update({'hm_hp_' + name: vars()['hm_hp_' + name]})
         return ret
 
