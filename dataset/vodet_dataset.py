@@ -214,8 +214,8 @@ class Vodet_Dataset(Dataset):
                 draw_gaussian(hm_det[label - len(self.multi_index)], ct_int, radius)
 
         ret = {'hm': hm, 'hm_ind': hm_ind, 'wh': wh, 'reg': reg, 'hm_det': hm_det, 'hm_det_ind': hm_det_ind,
-               'hps_ind': hps_ind, 'hps_vis_ind': hps_vis_ind, 'hps_unvis_ind': hps_unvis_ind, 'wh_det': wh_det,
-               'reg_det': reg_det, 'hps_coord': hps_coord, 'hps_ind': hps_ind, 'hm_hp_offset': hm_hp_offset,
+               'wh_det': wh_det, 'reg_det': reg_det, 'hps_coord': hps_coord, 'hps_ind': hps_ind,
+               'hps_vis_ind': hps_vis_ind, 'hps_unvis_ind': hps_unvis_ind, 'hm_hp_offset': hm_hp_offset,
                'hm_hp_ind': hm_hp_ind}
         for name in self.multi_heat_names:
             ret.update({'hm_hp_' + name: vars()['hm_hp_' + name]})
