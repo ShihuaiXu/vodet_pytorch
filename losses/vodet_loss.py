@@ -33,7 +33,7 @@ def hm_focal_loss(pred, gt):
 
 def reg_l1_loss(pred, gt, pos):
     batch, dim, height, width = gt.size()
-    # Computes input>other element-wise.
+    # Computes input > other element-wise.
     pos = pos.gt(0)
     obj_num = pos.sum()
     if obj_num == 0:
@@ -49,7 +49,7 @@ def reg_l1_loss(pred, gt, pos):
 
 
 def hps_l1_loss(pred, gt, hps_pos):
-    # Computes input>other element-wise.
+    # Computes input > other element-wise.
     hps_pos = hps_pos.gt(0)
     obj_num = hps_pos.sum()
     if obj_num == 0:
@@ -77,4 +77,5 @@ def hps_conf_ce_loss(pred, hps_vis_pos, hps_unvis_pos):
     else:
         hps_unvis_loss = F.binary_cross_entropy(F.sigmoid(pred[hps_unvis_pos_bool]), hps_unvis_pos[hps_unvis_pos_bool] * 0)
     loss = hps_vis_loss + hps_unvis_loss
+
     return loss
