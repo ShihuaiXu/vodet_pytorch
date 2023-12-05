@@ -173,19 +173,14 @@ class Vodet_Dataset(Dataset):
                                 draw_gaussian(hm[label], ct_int, radius)
 
                                 num_pt = pt.shape[0]
-                                pt_int = pt.astype(np.int32)
                                 for k in range(0, max_pts_num):
                                     if k < num_pt and pt[k][2] != 0:
                                         hps_coord[label][k * 2, center_y, center_x] = pt[k][0] - center_x
                                         hps_coord[label][k * 2 + 1, center_y, center_x] = pt[k][1] - center_y
-                                        hps_ind[label][k * 2: k * 2 + 2, center_y, center_x] = 1
                                         hps_vis_ind[label][k * 2: k * 2 + 2, center_y, center_x] = 1
-                                        if label in self.multi_heat_index:
-                                            draw_gaussian(vars()['hm_hp_' + self.class_names[label]][j], pt_int[j, :2], radius)
-                                            hm_hp_offset[label][:, pt_int[k, 1], pt_int[k, 0]] = pt[k, :2] - pt_int[k, :2]
-                                            hm_hp_ind[label][:, pt_int[k, 1], pt_int[k, 0]] = 1
                                     else:
                                         hps_unvis_ind[label][k * 2: k * 2 + 2, center_y, center_x] = 1
+                                    hps_ind[label][k * 2: k * 2 + 2, center_y, center_x] = 1
                 else:
                     ct = np.array([(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2], dtype=np.float32)
                     if self.use_multi_center:
@@ -222,6 +217,7 @@ class Vodet_Dataset(Dataset):
                                         hm_hp_ind[label][:, pt_int[k, 1], pt_int[k, 0]] = 1
                                 else:
                                     hps_unvis_ind[label][k * 2: k * 2 + 2, center_y, center_x] = 1
+                                hps_ind[label][k * 2: k * 2 + 2, center_y, center_x] = 1
             else:
                 ct = np.array([(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2], dtype=np.float32)
                 if self.use_multi_center:
