@@ -28,9 +28,9 @@ parser.add_argument('--num_workers', type=int, default=4, help='num_workers for 
 parser.add_argument('--load_model', default='', help='path to resume model')
 parser.add_argument('--resume', action='store_true',
                     help='resume an experiment, Reloaded the optimizer parameter and set load_model to model_last.pth')
-parser.add_argument('--wp_epoch', type=int, default=2,
+parser.add_argument('--wp_epoch', type=int, default=4,
                     help='warmup epochs for large dataset, default is 1, for small dataset default is 5-10')
-parser.add_argument('--val_intervals', type=int, default=10, help='number of epochs to run validation.')
+parser.add_argument('--val_intervals', type=int, default=150, help='number of epochs to run validation.')
 parser.add_argument('--save_dir', default='/home/xushihuai/vodet_weights', help='output log path')
 parser.add_argument('--save_all', action='store_true', help='save model to disk every val_intervals epochs.')
 parser.add_argument('--metric', default='loss', help='main metric to save best model')
