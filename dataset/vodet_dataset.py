@@ -105,6 +105,7 @@ class Vodet_Dataset(Dataset):
         # initialize the ndarray for gts
         hm = np.zeros((len(self.multi_index), output_h, output_w), dtype=np.float32)
         hm_ind = np.zeros((1, output_h, output_w), dtype=np.float32)
+        hm_notpil_ind = np.zeros((1, output_h, output_w), dtype=np.float32)
         wh = np.zeros((2, output_h, output_w), dtype=np.float32)
         reg = np.zeros((2, output_h, output_w), dtype=np.float32)
 
@@ -199,6 +200,7 @@ class Vodet_Dataset(Dataset):
                                 ct_int = (np.array([np.ceil(ct[0]), np.ceil(ct[1])], dtype=np.int32))
                             center_x, center_y = ct_int
                             hm_ind[:, center_y, center_x] = 1
+                            hm_notpil_ind[:, center_y, center_x] = 1
                             h, w = bbox[3] - bbox[1], bbox[2] - bbox[0]
                             wh[:, center_y, center_x] = w, h
                             reg[:, center_y, center_x] = ct - ct_int
@@ -241,7 +243,7 @@ class Vodet_Dataset(Dataset):
                         radius = max(0, int(radius))
                         draw_gaussian(hm_det[label - len(self.multi_index)], ct_int, radius)
 
-        ret = {'hm': hm, 'hm_ind': hm_ind, 'wh': wh, 'reg': reg, 'hm_det': hm_det, 'hm_det_ind': hm_det_ind,
+        ret = {'hm': hm, 'hm_ind': hm_ind, 'hm_notpil_ind': hm_notpil_ind, 'wh': wh, 'reg': reg, 'hm_det': hm_det, 'hm_det_ind': hm_det_ind,
                'wh_det': wh_det, 'reg_det': reg_det, 'hps_coord': hps_coord, 'hps_ind': hps_ind,
                'hps_vis_ind': hps_vis_ind, 'hps_unvis_ind': hps_unvis_ind, 'hm_hp_offset': hm_hp_offset,
                'hm_hp_ind': hm_hp_ind}

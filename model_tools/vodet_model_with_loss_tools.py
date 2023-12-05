@@ -40,7 +40,7 @@ class Vodet_ModleWithLoss(torch.nn.Module):
             output['hm_hp_' + name] = sigmoid(output['hm_hp_' + name])
             hm_hp_loss += self.hm_focal_loss(output['hm_hp_' + name], batch['hm_hp_' + name])
 
-        wh_loss += self.reg_l1_loss(output['wh'], batch['wh'], batch['hm_ind'])
+        wh_loss += self.reg_l1_loss(output['wh'], batch['wh'], batch['hm_notpil_ind'])
         wh_det_loss += self.reg_l1_loss(output['wh'], batch['wh_det'], batch['hm_det_ind']) * 1.5
         reg_loss += self.reg_l1_loss(output['reg'], batch['reg'], batch['hm_ind'])
         reg_det_loss += self.reg_l1_loss(output['reg'], batch['reg_det'], batch['hm_det_ind']) * 1.5
