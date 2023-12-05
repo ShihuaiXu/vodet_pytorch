@@ -44,7 +44,6 @@ def reg_l1_loss(pred, gt, pos):
     gt_x = gt[pos_inds]
     x_loss = nn.functional.l1_loss(x, gt_x, size_average=False)
     loss = x_loss / (obj_num + 1e-4)
-
     return loss
 
 
@@ -59,7 +58,6 @@ def hps_l1_loss(pred, gt, hps_pos):
     gt_x = gt[hps_pos]
     x_loss = nn.functional.l1_loss(x, gt_x, size_average=False)
     loss = x_loss / (obj_num + 1e-4)
-
     return loss
 
 
@@ -77,5 +75,4 @@ def hps_conf_ce_loss(pred, hps_vis_pos, hps_unvis_pos):
     else:
         hps_unvis_loss = F.binary_cross_entropy(F.sigmoid(pred[hps_unvis_pos_bool]), hps_unvis_pos[hps_unvis_pos_bool] * 0)
     loss = hps_vis_loss + hps_unvis_loss
-
     return loss
