@@ -1,6 +1,6 @@
 import torch
 
-from losses.vodet_loss import hm_focal_loss, reg_l1_loss, hps_l1_loss, hps_conf_ce_loss
+from losses.vodet_loss import hm_focal_loss, reg_l1_loss, hps_l1_loss, hps_conf_ce_loss, hps_cyc3_loss, hps_cyc2_loss
 from utils.utils import sigmoid
 
 
@@ -23,6 +23,8 @@ class Vodet_ModleWithLoss(torch.nn.Module):
         self.reg_l1_loss = reg_l1_loss
         self.hps_l1_loss = hps_l1_loss
         self.hps_conf_ce_loss = hps_conf_ce_loss
+        self.hps_cyc3_loss = hps_cyc3_loss
+        self.hps_cyc2_loss = hps_cyc2_loss
         self.phase = phase
 
     def forward(self, batch):
@@ -46,16 +48,35 @@ class Vodet_ModleWithLoss(torch.nn.Module):
         reg_det_loss += self.reg_l1_loss(output['reg'], batch['reg_det'], batch['hm_det_ind']) * 1.5
 
         hps_coord_loss += self.hps_l1_loss(output['hps_coord'], batch['hps_coord'][0], batch['hps_vis_ind'][0])
-        hps_coord_loss += self.hps_l1_loss(output['hps_coord'], batch['hps_coord'][1], batch['hps_vis_ind'][1])
-        hps_coord_loss += self.hps_l1_loss(output['hps_coord'], batch['hps_coord'][2], batch['hps_vis_ind'][2])
-        hps_coord_loss += self.hps_l1_loss(output['hps_coord'], batch['hps_coord'][3], batch['hps_vis_ind'][3])
         hps_coord_loss += self.hps_l1_loss(output['hps_coord'], batch['hps_coord'][4], batch['hps_vis_ind'][4])
 
         hps_conf_loss += self.hps_conf_ce_loss(output['hps_conf'], batch['hps_vis_ind'][0], batch['hps_unvis_ind'][0])
-        hps_conf_loss += self.hps_conf_ce_loss(output['hps_conf'], batch['hps_vis_ind'][1], batch['hps_unvis_ind'][1])
-        hps_conf_loss += self.hps_conf_ce_loss(output['hps_conf'], batch['hps_vis_ind'][2], batch['hps_unvis_ind'][2])
-        hps_conf_loss += self.hps_conf_ce_loss(output['hps_conf'], batch['hps_vis_ind'][3], batch['hps_unvis_ind'][3])
         hps_conf_loss += self.hps_conf_ce_loss(output['hps_conf'], batch['hps_vis_ind'][4], batch['hps_unvis_ind'][4])
+
+        pil3_hps_coord_loss, pil3_hps_conf_loss = self.hps_cyc3_loss(output['hps_coord'][:, :6, :, :],
+                                                                     output['hps_conf'][:, :3, :, :],
+                                                                     batch['hps_coord'][1],
+                                                                     batch['hps_ind'][1][:, :6, :, :],
+                                                                     batch['hps_vis_ind'][1][:, :6, :, :],
+                                                                     batch['hps_unvis_ind'][1][:, :6, :, :])
+        pil2_hps_coord_loss, pil2_hps_conf_loss = self.hps_cyc2_loss(output['hps_coord'][:, :4, :, :],
+                                                                     output['hps_conf'][:, :2, :, :],
+                                                                     batch['hps_coord'][2],
+                                                                     batch['hps_ind'][2][:, :4, :, :],
+                                                                     batch['hps_vis_ind'][2][:, :4, :, :],
+                                                                     batch['hps_unvis_ind'][1][:, :6, :, :])
+        pily_hps_coord_loss, pily_hps_conf_loss = self.hps_cyc2_loss(output['hps_coord'][:, :4, :, :],
+                                                                     output['hps_conf'][:, :2, :, :],
+                                                                     batch['hps_coord'][3],
+                                                                     batch['hps_ind'][3][:, :4, :, :],
+                                                                     batch['hps_vis_ind'][3][:, :4, :, :],
+                                                                     batch['hps_unvis_ind'][3][:, :4, :, :])
+        hps_coord_loss += pil3_hps_coord_loss
+        hps_coord_loss += pil2_hps_coord_loss
+        hps_coord_loss += pily_hps_coord_loss
+        hps_conf_loss += pil3_hps_conf_loss
+        hps_conf_loss += pil2_hps_conf_loss
+        hps_conf_loss += pily_hps_conf_loss
 
         hm_hp_off_loss += self.hps_l1_loss(output['hm_hp_offset'], batch['hm_hp_offset'][0], batch['hm_hp_ind'][0])
 
