@@ -45,11 +45,11 @@ class Vodet_ModleWithLoss(torch.nn.Module):
         reg_loss += self.reg_l1_loss(output['reg'], batch['reg'], batch['hm_ind'])
         reg_det_loss += self.reg_l1_loss(output['reg'], batch['reg_det'], batch['hm_det_ind']) * 1.5
 
-        hps_coord_loss += self.hps_l1_loss(output['hps_coord'], batch['hps_coord'][0], batch['hps_ind'][0])
-        hps_coord_loss += self.hps_l1_loss(output['hps_coord'], batch['hps_coord'][1], batch['hps_ind'][1])
-        hps_coord_loss += self.hps_l1_loss(output['hps_coord'], batch['hps_coord'][2], batch['hps_ind'][2])
-        hps_coord_loss += self.hps_l1_loss(output['hps_coord'], batch['hps_coord'][3], batch['hps_ind'][3])
-        hps_coord_loss += self.hps_l1_loss(output['hps_coord'], batch['hps_coord'][4], batch['hps_ind'][4])
+        hps_coord_loss += self.hps_l1_loss(output['hps_coord'], batch['hps_coord'][0], batch['hps_vis_ind'][0])
+        hps_coord_loss += self.hps_l1_loss(output['hps_coord'], batch['hps_coord'][1], batch['hps_vis_ind'][1])
+        hps_coord_loss += self.hps_l1_loss(output['hps_coord'], batch['hps_coord'][2], batch['hps_vis_ind'][2])
+        hps_coord_loss += self.hps_l1_loss(output['hps_coord'], batch['hps_coord'][3], batch['hps_vis_ind'][3])
+        hps_coord_loss += self.hps_l1_loss(output['hps_coord'], batch['hps_coord'][4], batch['hps_vis_ind'][4])
 
         hps_conf_loss += self.hps_conf_ce_loss(output['hps_conf'], batch['hps_vis_ind'][0], batch['hps_unvis_ind'][0])
         hps_conf_loss += self.hps_conf_ce_loss(output['hps_conf'], batch['hps_vis_ind'][1], batch['hps_unvis_ind'][1])

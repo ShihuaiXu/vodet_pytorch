@@ -62,6 +62,9 @@ def hps_l1_loss(pred, gt, hps_pos):
 
 
 def hps_conf_ce_loss(pred, hps_vis_pos, hps_unvis_pos):
+    select_index = [0, 2, 4, 6]
+    hps_vis_pos = hps_vis_pos[:, select_index, :, :]
+    hps_unvis_pos = hps_unvis_pos[:, select_index, :, :]
     hps_vis_pos_bool = hps_vis_pos.gt(0)
     hps_vis_obj_num = hps_vis_pos_bool.sum()
     if hps_vis_obj_num == 0:

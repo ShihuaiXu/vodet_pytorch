@@ -126,17 +126,17 @@ class Vodet_Dataset(Dataset):
                    np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32),
                    np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32)]
 
-        hps_vis_ind = [np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32),
-                       np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32),
-                       np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32),
-                       np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32),
-                       np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32)]
+        hps_vis_ind = [np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32),
+                       np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32),
+                       np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32),
+                       np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32),
+                       np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32)]
 
-        hps_unvis_ind = [np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32),
-                         np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32),
-                         np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32),
-                         np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32),
-                         np.zeros((self.max_pts_num, output_h, output_w), dtype=np.float32)]
+        hps_unvis_ind = [np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32),
+                         np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32),
+                         np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32),
+                         np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32),
+                         np.zeros((self.max_pts_num * 2, output_h, output_w), dtype=np.float32)]
 
         for name, pt_num in zip(self.multi_heat_names, self.multi_heat_pts_num):
             vars()['hm_hp_' + name] = np.zeros((pt_num, output_h, output_w), dtype=np.float32)
@@ -179,13 +179,13 @@ class Vodet_Dataset(Dataset):
                                         hps_coord[label][k * 2, center_y, center_x] = pt[k][0] - center_x
                                         hps_coord[label][k * 2 + 1, center_y, center_x] = pt[k][1] - center_y
                                         hps_ind[label][k * 2: k * 2 + 2, center_y, center_x] = 1
-                                        hps_vis_ind[label][k, center_y, center_x] = 1
+                                        hps_vis_ind[label][k * 2: k * 2 + 2, center_y, center_x] = 1
                                         if label in self.multi_heat_index:
                                             draw_gaussian(vars()['hm_hp_' + self.class_names[label]][j], pt_int[j, :2], radius)
                                             hm_hp_offset[label][:, pt_int[k, 1], pt_int[k, 0]] = pt[k, :2] - pt_int[k, :2]
                                             hm_hp_ind[label][:, pt_int[k, 1], pt_int[k, 0]] = 1
                                     else:
-                                        hps_unvis_ind[label][k, center_y, center_x] = 1
+                                        hps_unvis_ind[label][k * 2: k * 2 + 2, center_y, center_x] = 1
                 else:
                     ct = np.array([(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2], dtype=np.float32)
                     if self.use_multi_center:
@@ -215,13 +215,13 @@ class Vodet_Dataset(Dataset):
                                     hps_coord[label][k * 2, center_y, center_x] = pt[k][0] - center_x
                                     hps_coord[label][k * 2 + 1, center_y, center_x] = pt[k][1] - center_y
                                     hps_ind[label][k * 2: k * 2 + 2, center_y, center_x] = 1
-                                    hps_vis_ind[label][k, center_y, center_x] = 1
+                                    hps_vis_ind[label][k * 2: k * 2 + 2, center_y, center_x] = 1
                                     if label in self.multi_heat_index:
                                         draw_gaussian(vars()['hm_hp_' + self.class_names[label]][k], pt_int[k, :2], radius)
                                         hm_hp_offset[label][:, pt_int[k, 1], pt_int[k, 0]] = pt[k, :2] - pt_int[k, :2]
                                         hm_hp_ind[label][:, pt_int[k, 1], pt_int[k, 0]] = 1
                                 else:
-                                    hps_unvis_ind[label][k, center_y, center_x] = 1
+                                    hps_unvis_ind[label][k * 2: k * 2 + 2, center_y, center_x] = 1
             else:
                 ct = np.array([(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2], dtype=np.float32)
                 if self.use_multi_center:
