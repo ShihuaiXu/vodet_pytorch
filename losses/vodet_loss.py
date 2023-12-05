@@ -85,6 +85,9 @@ def hps_cyc3_loss(pred_coord, pred_conf, gt, hps_pos, hps_vis_pos, hps_unvis_pos
     ##############################
     # kps coord loss
     hps_coord_pos_bool = hps_pos.gt(0)
+    obj_num = hps_coord_pos_bool.sum()
+    if obj_num == 0:
+        return torch.tensor(0.0).to(pred_coord.device), torch.tensor(0.0).to(pred_coord.device)
     gt_x1 = gt[:, 0, :, :][hps_coord_pos_bool[:, 0, :, :]].unsqueeze(-1)
     gt_y1 = gt[:, 1, :, :][hps_coord_pos_bool[:, 1, :, :]].unsqueeze(-1)
     gt_x2 = gt[:, 2, :, :][hps_coord_pos_bool[:, 2, :, :]].unsqueeze(-1)
@@ -207,6 +210,9 @@ def hps_cyc2_loss(pred_coord, pred_conf, gt, hps_pos, hps_vis_pos, hps_unvis_pos
     ##############################
     # kps coord loss
     hps_coord_pos_bool = hps_pos.gt(0)
+    obj_num = hps_coord_pos_bool.sum()
+    if obj_num == 0:
+        return torch.tensor(0.0).to(pred_coord.device), torch.tensor(0.0).to(pred_coord.device)
     gt_x1 = gt[:, 0, :, :][hps_coord_pos_bool[:, 0, :, :]].unsqueeze(-1)
     gt_y1 = gt[:, 1, :, :][hps_coord_pos_bool[:, 1, :, :]].unsqueeze(-1)
     gt_x2 = gt[:, 2, :, :][hps_coord_pos_bool[:, 2, :, :]].unsqueeze(-1)
