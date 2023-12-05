@@ -1,5 +1,5 @@
 input_size: [512, 320] # W, H
-class_names: ['car', 'pil3', 'pil2',  'pily', 'ride', 'lock', 'col', 'con', 'per']
+class_names: ['car', 'pil3', 'pil2',  'pily', 'ride', 'lock', 'col', 'con', 'per', 'water']
 multi_index: [0, 1, 2, 3, 4]
 multi_pts_num: [4, 3, 2, 2, 2]
 pts_center_index: [1, 2] # pil use kps center
@@ -31,5 +31,5 @@ data_aug:
   crop_min_s: 10 # crop之后被截断物体的最小保留高度
 
 data_filter:
-  area_size: [20.48, 20.48, 20.48, 20.48, 20.48, 2.25, 2.25, 2.25, 20.48] # in the scale of 128x80
-  area_ratio: [0.33, 0.33, 0.33, 0.33, 0.33, 0.67, 0.67, 0.67, 0.67] # the cliped area ratio should lower it
+  area_size: [20.48, 20.48, 20.48, 20.48, 20.48, 2.25, 2.25, 2.25, 20.48, 2.25] # in the scale of 128x80
+  area_ratio: [0.33, 0.33, 0.33, 0.33, 0.33, 0.67, 0.67, 0.67, 0.67, 0.67] # the cliped area ratio should lower it

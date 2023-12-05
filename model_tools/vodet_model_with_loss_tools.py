@@ -64,7 +64,7 @@ class Vodet_ModleWithLoss(torch.nn.Module):
                                                                      batch['hps_coord'][2],
                                                                      batch['hps_ind'][2][:, :4, :, :],
                                                                      batch['hps_vis_ind'][2][:, :4, :, :],
-                                                                     batch['hps_unvis_ind'][1][:, :6, :, :])
+                                                                     batch['hps_unvis_ind'][1][:, :4, :, :])
         pily_hps_coord_loss, pily_hps_conf_loss = self.hps_cyc2_loss(output['hps_coord'][:, :4, :, :],
                                                                      output['hps_conf'][:, :2, :, :],
                                                                      batch['hps_coord'][3],
