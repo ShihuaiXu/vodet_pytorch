@@ -209,7 +209,6 @@ class Vodet_Dataset(Dataset):
                                 if k < num_pt and pt[k][2] != 0:
                                     hps_coord[label][k * 2, center_y, center_x] = pt[k][0] - center_x
                                     hps_coord[label][k * 2 + 1, center_y, center_x] = pt[k][1] - center_y
-                                    hps_ind[label][k * 2: k * 2 + 2, center_y, center_x] = 1
                                     hps_vis_ind[label][k * 2: k * 2 + 2, center_y, center_x] = 1
                                     if label in self.multi_heat_index:
                                         draw_gaussian(vars()['hm_hp_' + self.class_names[label]][k], pt_int[k, :2], radius)
