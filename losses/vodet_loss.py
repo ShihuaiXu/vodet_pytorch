@@ -82,228 +82,257 @@ def hps_conf_ce_loss(pred, hps_vis_pos, hps_unvis_pos):
 
 
 def hps_cyc3_loss(pred_coord, pred_conf, gt, hps_pos, hps_vis_pos, hps_unvis_pos):
-    ##############################
-    # kps coord loss
     hps_coord_pos_bool = hps_pos.gt(0)
-    obj_num = hps_coord_pos_bool.sum()
-    if obj_num == 0:
-        return torch.tensor(0.0).to(pred_coord.device), torch.tensor(0.0).to(pred_coord.device)
-    gt_x1 = gt[:, 0, :, :][hps_coord_pos_bool[:, 0, :, :]].unsqueeze(-1)
-    gt_y1 = gt[:, 1, :, :][hps_coord_pos_bool[:, 1, :, :]].unsqueeze(-1)
-    gt_x2 = gt[:, 2, :, :][hps_coord_pos_bool[:, 2, :, :]].unsqueeze(-1)
-    gt_y2 = gt[:, 3, :, :][hps_coord_pos_bool[:, 3, :, :]].unsqueeze(-1)
-    gt_x3 = gt[:, 4, :, :][hps_coord_pos_bool[:, 4, :, :]].unsqueeze(-1)
-    gt_y3 = gt[:, 5, :, :][hps_coord_pos_bool[:, 5, :, :]].unsqueeze(-1)
+    hps_vis_pos_bool = hps_vis_pos.gt(0)
+    hps_unvis_pos_bool = hps_unvis_pos.gt(0)
+    vis_obj_num = hps_vis_pos_bool.sum()
+    unvis_obj_num = hps_unvis_pos_bool.sum()
+    if vis_obj_num == 0:
+        loss_coord, loss_vis_conf = torch.tensor(0.0).to(pred_coord.device), torch.tensor(0.0).to(pred_coord.device)
+    else:
+        ##############################
+        # kps coord loss
+        gt_x1 = gt[:, 0, :, :][hps_coord_pos_bool[:, 0, :, :]].unsqueeze(-1)
+        gt_y1 = gt[:, 1, :, :][hps_coord_pos_bool[:, 1, :, :]].unsqueeze(-1)
+        gt_x2 = gt[:, 2, :, :][hps_coord_pos_bool[:, 2, :, :]].unsqueeze(-1)
+        gt_y2 = gt[:, 3, :, :][hps_coord_pos_bool[:, 3, :, :]].unsqueeze(-1)
+        gt_x3 = gt[:, 4, :, :][hps_coord_pos_bool[:, 4, :, :]].unsqueeze(-1)
+        gt_y3 = gt[:, 5, :, :][hps_coord_pos_bool[:, 5, :, :]].unsqueeze(-1)
 
-    gt_x1y1 = torch.cat([gt_x1, gt_y1], axis=1)
-    gt_x2y2 = torch.cat([gt_x2, gt_y2], axis=1)
-    gt_x3y3 = torch.cat([gt_x3, gt_y3], axis=1)
+        gt_x1y1 = torch.cat([gt_x1, gt_y1], axis=1)
+        gt_x2y2 = torch.cat([gt_x2, gt_y2], axis=1)
+        gt_x3y3 = torch.cat([gt_x3, gt_y3], axis=1)
 
-    gt_xy_1 = torch.cat([gt_x1y1, gt_x2y2, gt_x3y3], axis=1)
-    gt_xy_2 = torch.cat([gt_x2y2, gt_x3y3, gt_x1y1], axis=1)
-    gt_xy_3 = torch.cat([gt_x3y3, gt_x1y1, gt_x2y2], axis=1)
+        gt_xy_1 = torch.cat([gt_x1y1, gt_x2y2, gt_x3y3], axis=1)
+        gt_xy_2 = torch.cat([gt_x2y2, gt_x3y3, gt_x1y1], axis=1)
+        gt_xy_3 = torch.cat([gt_x3y3, gt_x1y1, gt_x2y2], axis=1)
 
-    mask_x1 = hps_vis_pos[:, 0, :, :][hps_coord_pos_bool[:, 0, :, :]].unsqueeze(-1)
-    mask_y1 = hps_vis_pos[:, 1, :, :][hps_coord_pos_bool[:, 1, :, :]].unsqueeze(-1)
-    mask_x2 = hps_vis_pos[:, 2, :, :][hps_coord_pos_bool[:, 2, :, :]].unsqueeze(-1)
-    mask_y2 = hps_vis_pos[:, 3, :, :][hps_coord_pos_bool[:, 3, :, :]].unsqueeze(-1)
-    mask_x3 = hps_vis_pos[:, 4, :, :][hps_coord_pos_bool[:, 4, :, :]].unsqueeze(-1)
-    mask_y3 = hps_vis_pos[:, 5, :, :][hps_coord_pos_bool[:, 5, :, :]].unsqueeze(-1)
+        mask_x1 = hps_vis_pos[:, 0, :, :][hps_coord_pos_bool[:, 0, :, :]].unsqueeze(-1)
+        mask_y1 = hps_vis_pos[:, 1, :, :][hps_coord_pos_bool[:, 1, :, :]].unsqueeze(-1)
+        mask_x2 = hps_vis_pos[:, 2, :, :][hps_coord_pos_bool[:, 2, :, :]].unsqueeze(-1)
+        mask_y2 = hps_vis_pos[:, 3, :, :][hps_coord_pos_bool[:, 3, :, :]].unsqueeze(-1)
+        mask_x3 = hps_vis_pos[:, 4, :, :][hps_coord_pos_bool[:, 4, :, :]].unsqueeze(-1)
+        mask_y3 = hps_vis_pos[:, 5, :, :][hps_coord_pos_bool[:, 5, :, :]].unsqueeze(-1)
 
-    mask_x1y1 = torch.cat([mask_x1, mask_y1], axis=1)
-    mask_x2y2 = torch.cat([mask_x2, mask_y2], axis=1)
-    mask_x3y3 = torch.cat([mask_x3, mask_y3], axis=1)
+        mask_x1y1 = torch.cat([mask_x1, mask_y1], axis=1)
+        mask_x2y2 = torch.cat([mask_x2, mask_y2], axis=1)
+        mask_x3y3 = torch.cat([mask_x3, mask_y3], axis=1)
 
-    mask_xy_1 = torch.cat([mask_x1y1, mask_x2y2, mask_x3y3], axis=1)
-    mask_xy_2 = torch.cat([mask_x2y2, mask_x3y3, mask_x1y1], axis=1)
-    mask_xy_3 = torch.cat([mask_x3y3, mask_x1y1, mask_x2y2], axis=1)
+        mask_xy_1 = torch.cat([mask_x1y1, mask_x2y2, mask_x3y3], axis=1)
+        mask_xy_2 = torch.cat([mask_x2y2, mask_x3y3, mask_x1y1], axis=1)
+        mask_xy_3 = torch.cat([mask_x3y3, mask_x1y1, mask_x2y2], axis=1)
 
-    dt_xy = pred_coord[hps_coord_pos_bool].view(-1, 6)
-    dt_xy_1 = dt_xy * mask_xy_1
-    dt_xy_2 = dt_xy * mask_xy_2
-    dt_xy_3 = dt_xy * mask_xy_3
+        dt_x1 = pred_coord[:, 0, :, :][hps_coord_pos_bool[:, 0, :, :]].unsqueeze(-1)
+        dt_y1 = pred_coord[:, 1, :, :][hps_coord_pos_bool[:, 1, :, :]].unsqueeze(-1)
+        dt_x2 = pred_coord[:, 2, :, :][hps_coord_pos_bool[:, 2, :, :]].unsqueeze(-1)
+        dt_y2 = pred_coord[:, 3, :, :][hps_coord_pos_bool[:, 3, :, :]].unsqueeze(-1)
+        dt_x3 = pred_coord[:, 4, :, :][hps_coord_pos_bool[:, 4, :, :]].unsqueeze(-1)
+        dt_y3 = pred_coord[:, 5, :, :][hps_coord_pos_bool[:, 5, :, :]].unsqueeze(-1)
+        dt_xy = torch.cat([dt_x1, dt_y1, dt_x2, dt_y2, dt_x3, dt_y3], axis=1)
+        dt_xy_1 = dt_xy * mask_xy_1
+        dt_xy_2 = dt_xy * mask_xy_2
+        dt_xy_3 = dt_xy * mask_xy_3
 
-    loss1 = torch.abs(dt_xy_1 - gt_xy_1)
-    loss2 = torch.abs(dt_xy_2 - gt_xy_2)
-    loss3 = torch.abs(dt_xy_3 - gt_xy_3)
+        loss1 = torch.abs(dt_xy_1 - gt_xy_1)
+        loss2 = torch.abs(dt_xy_2 - gt_xy_2)
+        loss3 = torch.abs(dt_xy_3 - gt_xy_3)
 
-    gt_xy_1 = gt_xy_1.unsqueeze(1)
-    gt_xy_2 = gt_xy_2.unsqueeze(1)
-    gt_xy_3 = gt_xy_3.unsqueeze(1)
-    gt_xy_cat = torch.cat([gt_xy_1, gt_xy_2, gt_xy_3], axis=1)
+        gt_xy_1 = gt_xy_1.unsqueeze(1)
+        gt_xy_2 = gt_xy_2.unsqueeze(1)
+        gt_xy_3 = gt_xy_3.unsqueeze(1)
+        gt_xy_cat = torch.cat([gt_xy_1, gt_xy_2, gt_xy_3], axis=1)
 
-    dt_xy_1 = dt_xy_1.unsqueeze(1)
-    dt_xy_2 = dt_xy_2.unsqueeze(1)
-    dt_xy_3 = dt_xy_3.unsqueeze(1)
-    dt_xy_cat = torch.cat([dt_xy_1, dt_xy_2, dt_xy_3], axis=1)
+        dt_xy_1 = dt_xy_1.unsqueeze(1)
+        dt_xy_2 = dt_xy_2.unsqueeze(1)
+        dt_xy_3 = dt_xy_3.unsqueeze(1)
+        dt_xy_cat = torch.cat([dt_xy_1, dt_xy_2, dt_xy_3], axis=1)
 
-    loss1_sum = torch.sum(loss1, dim=-1).unsqueeze(-1)
-    loss2_sum = torch.sum(loss2, dim=-1).unsqueeze(-1)
-    loss3_sum = torch.sum(loss3, dim=-1).unsqueeze(-1)
-    loss_sum_cat = torch.cat([loss1_sum, loss2_sum, loss3_sum], axis=-1)
+        loss1_sum = torch.sum(loss1, dim=-1).unsqueeze(-1)
+        loss2_sum = torch.sum(loss2, dim=-1).unsqueeze(-1)
+        loss3_sum = torch.sum(loss3, dim=-1).unsqueeze(-1)
+        loss_sum_cat = torch.cat([loss1_sum, loss2_sum, loss3_sum], axis=-1)
 
-    first_pt_gt = torch.argmin(loss_sum_cat, axis=-1)
-    first_pt_gt_onehot = F.one_hot(first_pt_gt, num_classes=3)
+        first_pt_gt = torch.argmin(loss_sum_cat, axis=-1)
+        first_pt_gt_onehot = F.one_hot(first_pt_gt, num_classes=3)
 
-    pred_coord_pt_gt = dt_xy_cat[first_pt_gt_onehot == 1]
-    target_coord_pt_gt = gt_xy_cat[first_pt_gt_onehot == 1]
-    loss_coord = F.l1_loss(pred_coord_pt_gt, target_coord_pt_gt, size_average=False)
-    loss_coord = loss_coord / (mask_xy_1.sum() + 1e-4)
-    ##############################
-    # kps vis conf loss
-    hps_conf_pos_bool = hps_pos[:, [0, 2, 4], :, :].gt(0)
-    gt_vis_1 = torch.cat([mask_x1, mask_x2, mask_x3], axis=1)
-    gt_vis_2 = torch.cat([mask_x2, mask_x3, mask_x1], axis=1)
-    gt_vis_3 = torch.cat([mask_x3, mask_x1, mask_x2], axis=1)
+        pred_coord_pt_gt = dt_xy_cat[first_pt_gt_onehot == 1]
+        target_coord_pt_gt = gt_xy_cat[first_pt_gt_onehot == 1]
+        loss_coord = F.l1_loss(pred_coord_pt_gt, target_coord_pt_gt, size_average=False)
+        loss_coord = loss_coord / (mask_xy_1.sum() + 1e-4)
+        ##############################
+        # kps vis conf loss
+        hps_conf_pos_bool = hps_pos[:, [0, 2, 4], :, :].gt(0)
+        gt_vis_1 = torch.cat([mask_x1, mask_x2, mask_x3], axis=1)
+        gt_vis_2 = torch.cat([mask_x2, mask_x3, mask_x1], axis=1)
+        gt_vis_3 = torch.cat([mask_x3, mask_x1, mask_x2], axis=1)
 
-    dt_vis = pred_conf[hps_conf_pos_bool].view(-1, 3)
-    dt_vis_1 = F.sigmoid(dt_vis) * gt_vis_1
-    dt_vis_2 = F.sigmoid(dt_vis) * gt_vis_2
-    dt_vis_3 = F.sigmoid(dt_vis) * gt_vis_3
+        dt_conf_1 = pred_conf[:, 0, :, :][hps_conf_pos_bool[:, 0, :, :]].unsqueeze(-1)
+        dt_conf_2 = pred_conf[:, 1, :, :][hps_conf_pos_bool[:, 1, :, :]].unsqueeze(-1)
+        dt_conf_3 = pred_conf[:, 2, :, :][hps_conf_pos_bool[:, 2, :, :]].unsqueeze(-1)
+        dt_conf = torch.cat([dt_conf_1, dt_conf_2, dt_conf_3], axis=1)
+        dt_vis_1 = F.sigmoid(dt_conf) * gt_vis_1
+        dt_vis_2 = F.sigmoid(dt_conf) * gt_vis_2
+        dt_vis_3 = F.sigmoid(dt_conf) * gt_vis_3
 
-    gt_vis_1 = gt_vis_1.unsqueeze(1)
-    gt_vis_2 = gt_vis_2.unsqueeze(1)
-    gt_vis_3 = gt_vis_3.unsqueeze(1)
-    gt_vis_ts_cat = torch.cat([gt_vis_1, gt_vis_2, gt_vis_3], axis=1)
+        gt_vis_1 = gt_vis_1.unsqueeze(1)
+        gt_vis_2 = gt_vis_2.unsqueeze(1)
+        gt_vis_3 = gt_vis_3.unsqueeze(1)
+        gt_vis_ts_cat = torch.cat([gt_vis_1, gt_vis_2, gt_vis_3], axis=1)
 
-    dt_vis_1 = dt_vis_1.unsqueeze(1)
-    dt_vis_2 = dt_vis_2.unsqueeze(1)
-    dt_vis_3 = dt_vis_3.unsqueeze(1)
-    dt_vis_cat = torch.cat([dt_vis_1, dt_vis_2, dt_vis_3], axis=1)
+        dt_vis_1 = dt_vis_1.unsqueeze(1)
+        dt_vis_2 = dt_vis_2.unsqueeze(1)
+        dt_vis_3 = dt_vis_3.unsqueeze(1)
+        dt_vis_cat = torch.cat([dt_vis_1, dt_vis_2, dt_vis_3], axis=1)
 
-    pred_vis_pt_gt = dt_vis_cat[first_pt_gt_onehot == 1]
-    target_vis_pt_gt = gt_vis_ts_cat[first_pt_gt_onehot == 1]
-    loss_vis_conf = F.binary_cross_entropy(pred_vis_pt_gt, target_vis_pt_gt)
-    ##############################
-    # kps unvis conf loss
-    mask_unvis_x1 = hps_unvis_pos[:, 0, :, :][hps_conf_pos_bool[:, 0, :, :]].unsqueeze(-1)
-    mask_unvis_x2 = hps_unvis_pos[:, 1, :, :][hps_conf_pos_bool[:, 1, :, :]].unsqueeze(-1)
-    mask_unvis_x3 = hps_unvis_pos[:, 2, :, :][hps_conf_pos_bool[:, 2, :, :]].unsqueeze(-1)
+        pred_vis_pt_gt = dt_vis_cat[first_pt_gt_onehot == 1]
+        target_vis_pt_gt = gt_vis_ts_cat[first_pt_gt_onehot == 1]
+        loss_vis_conf = F.binary_cross_entropy(pred_vis_pt_gt, target_vis_pt_gt)
+        ##############################
+    if unvis_obj_num == 0:
+        loss_unvis_conf = torch.tensor(0.0).to(pred_coord.device)
+    else:
+        ##############################
+        # kps unvis conf loss
+        mask_unvis_x1 = hps_unvis_pos[:, 0, :, :][hps_conf_pos_bool[:, 0, :, :]].unsqueeze(-1)
+        mask_unvis_x2 = hps_unvis_pos[:, 1, :, :][hps_conf_pos_bool[:, 1, :, :]].unsqueeze(-1)
+        mask_unvis_x3 = hps_unvis_pos[:, 2, :, :][hps_conf_pos_bool[:, 2, :, :]].unsqueeze(-1)
 
-    gt_unvis_1 = torch.cat([mask_unvis_x1, mask_unvis_x2, mask_unvis_x3], axis=1)
-    gt_unvis_2 = torch.cat([mask_unvis_x2, mask_unvis_x3, mask_unvis_x1], axis=1)
-    gt_unvis_3 = torch.cat([mask_unvis_x3, mask_unvis_x1, mask_unvis_x2], axis=1)
+        gt_unvis_1 = torch.cat([mask_unvis_x1, mask_unvis_x2, mask_unvis_x3], axis=1)
+        gt_unvis_2 = torch.cat([mask_unvis_x2, mask_unvis_x3, mask_unvis_x1], axis=1)
+        gt_unvis_3 = torch.cat([mask_unvis_x3, mask_unvis_x1, mask_unvis_x2], axis=1)
 
-    dt_unvis = pred_conf[hps_conf_pos_bool].view(-1, 3)
-    dt_unvis_1 = F.sigmoid(dt_unvis) * gt_unvis_1
-    dt_unvis_2 = F.sigmoid(dt_unvis) * gt_unvis_2
-    dt_unvis_3 = F.sigmoid(dt_unvis) * gt_unvis_3
+        dt_unvis_1 = F.sigmoid(dt_conf) * gt_unvis_1
+        dt_unvis_2 = F.sigmoid(dt_conf) * gt_unvis_2
+        dt_unvis_3 = F.sigmoid(dt_conf) * gt_unvis_3
 
-    gt_unvis_1 = gt_unvis_1.unsqueeze(1)
-    gt_unvis_2 = gt_unvis_2.unsqueeze(1)
-    gt_unvis_3 = gt_unvis_3.unsqueeze(1)
-    gt_unvis_cat = torch.cat([gt_unvis_1, gt_unvis_2, gt_unvis_3], axis=1)
+        gt_unvis_1 = gt_unvis_1.unsqueeze(1)
+        gt_unvis_2 = gt_unvis_2.unsqueeze(1)
+        gt_unvis_3 = gt_unvis_3.unsqueeze(1)
+        gt_unvis_cat = torch.cat([gt_unvis_1, gt_unvis_2, gt_unvis_3], axis=1)
 
-    dt_unvis_1 = dt_unvis_1.unsqueeze(1)
-    dt_unvis_2 = dt_unvis_2.unsqueeze(1)
-    dt_unvis_3 = dt_unvis_3.unsqueeze(1)
-    dt_unvis_cat = torch.cat([dt_unvis_1, dt_unvis_2, dt_unvis_3], axis=1)
+        dt_unvis_1 = dt_unvis_1.unsqueeze(1)
+        dt_unvis_2 = dt_unvis_2.unsqueeze(1)
+        dt_unvis_3 = dt_unvis_3.unsqueeze(1)
+        dt_unvis_cat = torch.cat([dt_unvis_1, dt_unvis_2, dt_unvis_3], axis=1)
 
-    pred_unvis_pt_gt = dt_unvis_cat[first_pt_gt_onehot == 1]
-    target_unvis_pt_gt = gt_unvis_cat[first_pt_gt_onehot == 1]
-    loss_unvis_conf = F.binary_cross_entropy(pred_unvis_pt_gt, target_unvis_pt_gt)
-    ##############################
+        pred_unvis_pt_gt = dt_unvis_cat[first_pt_gt_onehot == 1]
+        target_unvis_pt_gt = gt_unvis_cat[first_pt_gt_onehot == 1]
+        loss_unvis_conf = F.binary_cross_entropy(pred_unvis_pt_gt, target_unvis_pt_gt)
+        ##############################
     return loss_coord, loss_vis_conf + loss_unvis_conf
 
 
 def hps_cyc2_loss(pred_coord, pred_conf, gt, hps_pos, hps_vis_pos, hps_unvis_pos):
-    ##############################
-    # kps coord loss
     hps_coord_pos_bool = hps_pos.gt(0)
-    obj_num = hps_coord_pos_bool.sum()
-    if obj_num == 0:
-        return torch.tensor(0.0).to(pred_coord.device), torch.tensor(0.0).to(pred_coord.device)
-    gt_x1 = gt[:, 0, :, :][hps_coord_pos_bool[:, 0, :, :]].unsqueeze(-1)
-    gt_y1 = gt[:, 1, :, :][hps_coord_pos_bool[:, 1, :, :]].unsqueeze(-1)
-    gt_x2 = gt[:, 2, :, :][hps_coord_pos_bool[:, 2, :, :]].unsqueeze(-1)
-    gt_y2 = gt[:, 3, :, :][hps_coord_pos_bool[:, 3, :, :]].unsqueeze(-1)
+    hps_vis_pos_bool = hps_vis_pos.gt(0)
+    hps_unvis_pos_bool = hps_unvis_pos.gt(0)
+    vis_obj_num = hps_vis_pos_bool.sum()
+    unvis_obj_num = hps_unvis_pos_bool.sum()
+    if vis_obj_num == 0:
+        loss_coord, loss_vis_conf = torch.tensor(0.0).to(pred_coord.device), torch.tensor(0.0).to(pred_coord.device)
+    else:
+        ##############################
+        # kps coord loss
+        gt_x1 = gt[:, 0, :, :][hps_coord_pos_bool[:, 0, :, :]].unsqueeze(-1)
+        gt_y1 = gt[:, 1, :, :][hps_coord_pos_bool[:, 1, :, :]].unsqueeze(-1)
+        gt_x2 = gt[:, 2, :, :][hps_coord_pos_bool[:, 2, :, :]].unsqueeze(-1)
+        gt_y2 = gt[:, 3, :, :][hps_coord_pos_bool[:, 3, :, :]].unsqueeze(-1)
 
-    gt_x1y1 = torch.cat([gt_x1, gt_y1], axis=1)
-    gt_x2y2 = torch.cat([gt_x2, gt_y2], axis=1)
+        gt_x1y1 = torch.cat([gt_x1, gt_y1], axis=1)
+        gt_x2y2 = torch.cat([gt_x2, gt_y2], axis=1)
 
-    gt_xy_1 = torch.cat([gt_x1y1, gt_x2y2], axis=1)
-    gt_xy_2 = torch.cat([gt_x2y2, gt_x1y1], axis=1)
+        gt_xy_1 = torch.cat([gt_x1y1, gt_x2y2], axis=1)
+        gt_xy_2 = torch.cat([gt_x2y2, gt_x1y1], axis=1)
 
-    mask_x1 = hps_vis_pos[:, 0, :, :][hps_coord_pos_bool[:, 0, :, :]].unsqueeze(-1)
-    mask_y1 = hps_vis_pos[:, 1, :, :][hps_coord_pos_bool[:, 1, :, :]].unsqueeze(-1)
-    mask_x2 = hps_vis_pos[:, 2, :, :][hps_coord_pos_bool[:, 2, :, :]].unsqueeze(-1)
-    mask_y2 = hps_vis_pos[:, 3, :, :][hps_coord_pos_bool[:, 3, :, :]].unsqueeze(-1)
+        mask_x1 = hps_vis_pos[:, 0, :, :][hps_coord_pos_bool[:, 0, :, :]].unsqueeze(-1)
+        mask_y1 = hps_vis_pos[:, 1, :, :][hps_coord_pos_bool[:, 1, :, :]].unsqueeze(-1)
+        mask_x2 = hps_vis_pos[:, 2, :, :][hps_coord_pos_bool[:, 2, :, :]].unsqueeze(-1)
+        mask_y2 = hps_vis_pos[:, 3, :, :][hps_coord_pos_bool[:, 3, :, :]].unsqueeze(-1)
 
-    mask_x1y1 = torch.cat([mask_x1, mask_y1], axis=1)
-    mask_x2y2 = torch.cat([mask_x2, mask_y2], axis=1)
+        mask_x1y1 = torch.cat([mask_x1, mask_y1], axis=1)
+        mask_x2y2 = torch.cat([mask_x2, mask_y2], axis=1)
 
-    mask_xy_1 = torch.cat([mask_x1y1, mask_x2y2], axis=1)
-    mask_xy_2 = torch.cat([mask_x2y2, mask_x1y1], axis=1)
+        mask_xy_1 = torch.cat([mask_x1y1, mask_x2y2], axis=1)
+        mask_xy_2 = torch.cat([mask_x2y2, mask_x1y1], axis=1)
 
-    dt_xy = pred_coord[hps_coord_pos_bool].view(-1, 4)
-    dt_xy_1 = dt_xy * mask_xy_1
-    dt_xy_2 = dt_xy * mask_xy_2
+        dt_x1 = pred_coord[:, 0, :, :][hps_coord_pos_bool[:, 0, :, :]].unsqueeze(-1)
+        dt_y1 = pred_coord[:, 1, :, :][hps_coord_pos_bool[:, 1, :, :]].unsqueeze(-1)
+        dt_x2 = pred_coord[:, 2, :, :][hps_coord_pos_bool[:, 2, :, :]].unsqueeze(-1)
+        dt_y2 = pred_coord[:, 3, :, :][hps_coord_pos_bool[:, 3, :, :]].unsqueeze(-1)
+        dt_xy = torch.cat([dt_x1, dt_y1, dt_x2, dt_y2], axis=1)
+        dt_xy_1 = dt_xy * mask_xy_1
+        dt_xy_2 = dt_xy * mask_xy_2
 
-    loss1 = torch.abs(dt_xy_1 - gt_xy_1)
-    loss2 = torch.abs(dt_xy_2 - gt_xy_2)
+        loss1 = torch.abs(dt_xy_1 - gt_xy_1)
+        loss2 = torch.abs(dt_xy_2 - gt_xy_2)
 
-    gt_xy_1 = gt_xy_1.unsqueeze(1)
-    gt_xy_2 = gt_xy_2.unsqueeze(1)
-    gt_xy_cat = torch.cat([gt_xy_1, gt_xy_2], axis=1)
+        gt_xy_1 = gt_xy_1.unsqueeze(1)
+        gt_xy_2 = gt_xy_2.unsqueeze(1)
+        gt_xy_cat = torch.cat([gt_xy_1, gt_xy_2], axis=1)
 
-    dt_xy_1 = dt_xy_1.unsqueeze(1)
-    dt_xy_2 = dt_xy_2.unsqueeze(1)
-    dt_xy_cat = torch.cat([dt_xy_1, dt_xy_2], axis=1)
+        dt_xy_1 = dt_xy_1.unsqueeze(1)
+        dt_xy_2 = dt_xy_2.unsqueeze(1)
+        dt_xy_cat = torch.cat([dt_xy_1, dt_xy_2], axis=1)
 
-    loss1_sum = torch.sum(loss1, dim=-1).unsqueeze(-1)
-    loss2_sum = torch.sum(loss2, dim=-1).unsqueeze(-1)
-    loss_sum_cat = torch.cat([loss1_sum, loss2_sum], axis=-1)
+        loss1_sum = torch.sum(loss1, dim=-1).unsqueeze(-1)
+        loss2_sum = torch.sum(loss2, dim=-1).unsqueeze(-1)
+        loss_sum_cat = torch.cat([loss1_sum, loss2_sum], axis=-1)
 
-    first_pt_gt = torch.argmin(loss_sum_cat, axis=-1)
-    first_pt_gt_onehot = F.one_hot(first_pt_gt, num_classes=2)
+        first_pt_gt = torch.argmin(loss_sum_cat, axis=-1)
+        first_pt_gt_onehot = F.one_hot(first_pt_gt, num_classes=2)
 
-    pred_coord_pt_gt = dt_xy_cat[first_pt_gt_onehot == 1]
-    target_coord_pt_gt = gt_xy_cat[first_pt_gt_onehot == 1]
-    loss_coord = F.l1_loss(pred_coord_pt_gt, target_coord_pt_gt, size_average=False)
-    loss_coord = loss_coord / (mask_xy_1.sum() + 1e-4)
-    ##############################
-    # kps vis conf loss
-    hps_conf_pos_bool = hps_pos[:, [0, 2], :, :].gt(0)
-    gt_vis_1 = torch.cat([mask_x1, mask_x2], axis=1)
-    gt_vis_2 = torch.cat([mask_x2, mask_x1], axis=1)
+        pred_coord_pt_gt = dt_xy_cat[first_pt_gt_onehot == 1]
+        target_coord_pt_gt = gt_xy_cat[first_pt_gt_onehot == 1]
+        loss_coord = F.l1_loss(pred_coord_pt_gt, target_coord_pt_gt, size_average=False)
+        loss_coord = loss_coord / (mask_xy_1.sum() + 1e-4)
+        ##############################
+        # kps vis conf loss
+        hps_conf_pos_bool = hps_pos[:, [0, 2], :, :].gt(0)
+        gt_vis_1 = torch.cat([mask_x1, mask_x2], axis=1)
+        gt_vis_2 = torch.cat([mask_x2, mask_x1], axis=1)
 
-    dt_vis = pred_conf[hps_conf_pos_bool].view(-1, 2)
-    dt_vis_1 = F.sigmoid(dt_vis) * gt_vis_1
-    dt_vis_2 = F.sigmoid(dt_vis) * gt_vis_2
+        dt_conf_1 = pred_conf[:, 0, :, :][hps_conf_pos_bool[:, 0, :, :]].unsqueeze(-1)
+        dt_conf_2 = pred_conf[:, 1, :, :][hps_conf_pos_bool[:, 1, :, :]].unsqueeze(-1)
+        dt_conf = torch.cat([dt_conf_1, dt_conf_2], axis=1)
+        dt_vis_1 = F.sigmoid(dt_conf) * gt_vis_1
+        dt_vis_2 = F.sigmoid(dt_conf) * gt_vis_2
 
-    gt_vis_1 = gt_vis_1.unsqueeze(1)
-    gt_vis_2 = gt_vis_2.unsqueeze(1)
-    gt_vis_ts_cat = torch.cat([gt_vis_1, gt_vis_2], axis=1)
+        gt_vis_1 = gt_vis_1.unsqueeze(1)
+        gt_vis_2 = gt_vis_2.unsqueeze(1)
+        gt_vis_ts_cat = torch.cat([gt_vis_1, gt_vis_2], axis=1)
 
-    dt_vis_1 = dt_vis_1.unsqueeze(1)
-    dt_vis_2 = dt_vis_2.unsqueeze(1)
-    dt_vis_cat = torch.cat([dt_vis_1, dt_vis_2], axis=1)
+        dt_vis_1 = dt_vis_1.unsqueeze(1)
+        dt_vis_2 = dt_vis_2.unsqueeze(1)
+        dt_vis_cat = torch.cat([dt_vis_1, dt_vis_2], axis=1)
 
-    pred_vis_pt_gt = dt_vis_cat[first_pt_gt_onehot == 1]
-    target_vis_pt_gt = gt_vis_ts_cat[first_pt_gt_onehot == 1]
-    loss_vis_conf = F.binary_cross_entropy(pred_vis_pt_gt, target_vis_pt_gt)
-    ##############################
-    # kps unvis conf loss
-    mask_unvis_x1 = hps_unvis_pos[:, 0, :, :][hps_conf_pos_bool[:, 0, :, :]].unsqueeze(-1)
-    mask_unvis_x2 = hps_unvis_pos[:, 1, :, :][hps_conf_pos_bool[:, 1, :, :]].unsqueeze(-1)
+        pred_vis_pt_gt = dt_vis_cat[first_pt_gt_onehot == 1]
+        target_vis_pt_gt = gt_vis_ts_cat[first_pt_gt_onehot == 1]
+        loss_vis_conf = F.binary_cross_entropy(pred_vis_pt_gt, target_vis_pt_gt)
+        ##############################
+    if unvis_obj_num == 0:
+        loss_unvis_conf = torch.tensor(0.0).to(pred_coord.device)
+    else:
+        ##############################
+        # kps unvis conf loss
+        mask_unvis_x1 = hps_unvis_pos[:, 0, :, :][hps_conf_pos_bool[:, 0, :, :]].unsqueeze(-1)
+        mask_unvis_x2 = hps_unvis_pos[:, 1, :, :][hps_conf_pos_bool[:, 1, :, :]].unsqueeze(-1)
 
-    gt_unvis_1 = torch.cat([mask_unvis_x1, mask_unvis_x2], axis=1)
-    gt_unvis_2 = torch.cat([mask_unvis_x2, mask_unvis_x1], axis=1)
+        gt_unvis_1 = torch.cat([mask_unvis_x1, mask_unvis_x2], axis=1)
+        gt_unvis_2 = torch.cat([mask_unvis_x2, mask_unvis_x1], axis=1)
 
-    dt_unvis = pred_conf[hps_conf_pos_bool].view(-1, 2)
-    dt_unvis_1 = F.sigmoid(dt_unvis) * gt_unvis_1
-    dt_unvis_2 = F.sigmoid(dt_unvis) * gt_unvis_2
+        dt_unvis_1 = F.sigmoid(dt_conf) * gt_unvis_1
+        dt_unvis_2 = F.sigmoid(dt_conf) * gt_unvis_2
 
-    gt_unvis_1 = gt_unvis_1.unsqueeze(1)
-    gt_unvis_2 = gt_unvis_2.unsqueeze(1)
-    gt_unvis_cat = torch.cat([gt_unvis_1, gt_unvis_2], axis=1)
+        gt_unvis_1 = gt_unvis_1.unsqueeze(1)
+        gt_unvis_2 = gt_unvis_2.unsqueeze(1)
+        gt_unvis_cat = torch.cat([gt_unvis_1, gt_unvis_2], axis=1)
 
-    dt_unvis_1 = dt_unvis_1.unsqueeze(1)
-    dt_unvis_2 = dt_unvis_2.unsqueeze(1)
-    dt_unvis_cat = torch.cat([dt_unvis_1, dt_unvis_2], axis=1)
+        dt_unvis_1 = dt_unvis_1.unsqueeze(1)
+        dt_unvis_2 = dt_unvis_2.unsqueeze(1)
+        dt_unvis_cat = torch.cat([dt_unvis_1, dt_unvis_2], axis=1)
 
-    pred_unvis_pt_gt = dt_unvis_cat[first_pt_gt_onehot == 1]
-    target_unvis_pt_gt = gt_unvis_cat[first_pt_gt_onehot == 1]
-    loss_unvis_conf = F.binary_cross_entropy(pred_unvis_pt_gt, target_unvis_pt_gt)
-    ##############################
+        pred_unvis_pt_gt = dt_unvis_cat[first_pt_gt_onehot == 1]
+        target_unvis_pt_gt = gt_unvis_cat[first_pt_gt_onehot == 1]
+        loss_unvis_conf = F.binary_cross_entropy(pred_unvis_pt_gt, target_unvis_pt_gt)
+        ##############################
     return loss_coord, loss_vis_conf + loss_unvis_conf
