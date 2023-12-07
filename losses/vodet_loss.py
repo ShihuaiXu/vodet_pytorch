@@ -200,7 +200,11 @@ def hps_cyc3_loss(pred_coord, pred_conf, gt, hps_pos, hps_vis_pos, hps_unvis_pos
         dt_conf_2 = pred_conf[:, 1, :, :][hps_conf_pos_bool[:, 1, :, :]].unsqueeze(-1)
         dt_conf_3 = pred_conf[:, 2, :, :][hps_conf_pos_bool[:, 2, :, :]].unsqueeze(-1)
         dt_conf = torch.cat([dt_conf_1, dt_conf_2, dt_conf_3], axis=1)
-        loss_unvis_conf = F.binary_cross_entropy(dt_conf, dt_conf * 0)
+        mask_unvis_x1 = hps_unvis_pos[:, 0, :, :][hps_conf_pos_bool[:, 0, :, :]].unsqueeze(-1)
+        mask_unvis_x2 = hps_unvis_pos[:, 1, :, :][hps_conf_pos_bool[:, 1, :, :]].unsqueeze(-1)
+        mask_unvis_x3 = hps_unvis_pos[:, 2, :, :][hps_conf_pos_bool[:, 2, :, :]].unsqueeze(-1)
+        gt_unvis = torch.cat([mask_unvis_x1, mask_unvis_x2, mask_unvis_x3], axis=1)
+        loss_unvis_conf = F.binary_cross_entropy(F.sigmoid(dt_conf), gt_unvis * 0)
         ##############################
     elif vis_obj_num != 0 and unvis_obj_num != 0:
         ##############################
@@ -428,7 +432,10 @@ def hps_cyc2_loss(pred_coord, pred_conf, gt, hps_pos, hps_vis_pos, hps_unvis_pos
         dt_conf_1 = pred_conf[:, 0, :, :][hps_conf_pos_bool[:, 0, :, :]].unsqueeze(-1)
         dt_conf_2 = pred_conf[:, 1, :, :][hps_conf_pos_bool[:, 1, :, :]].unsqueeze(-1)
         dt_conf = torch.cat([dt_conf_1, dt_conf_2], axis=1)
-        loss_unvis_conf = F.binary_cross_entropy(F.sigmoid(dt_conf), dt_conf * 0)
+        mask_unvis_x1 = hps_unvis_pos[:, 0, :, :][hps_conf_pos_bool[:, 0, :, :]].unsqueeze(-1)
+        mask_unvis_x2 = hps_unvis_pos[:, 1, :, :][hps_conf_pos_bool[:, 1, :, :]].unsqueeze(-1)
+        gt_unvis = torch.cat([mask_unvis_x1, mask_unvis_x2], axis=1)
+        loss_unvis_conf = F.binary_cross_entropy(F.sigmoid(dt_conf), gt_unvis * 0)
         ##############################
     elif vis_obj_num != 0 and unvis_obj_num != 0:
         ##############################
