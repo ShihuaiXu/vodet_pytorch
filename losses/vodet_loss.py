@@ -83,6 +83,7 @@ def hps_conf_ce_loss(pred, hps_vis_pos, hps_unvis_pos):
 
 def hps_cyc3_loss(pred_coord, pred_conf, gt, hps_pos, hps_vis_pos, hps_unvis_pos):
     hps_coord_pos_bool = hps_pos.gt(0)
+    hps_conf_pos_bool = hps_pos[:, [0, 2, 4], :, :].gt(0)
     hps_vis_pos_bool = hps_vis_pos.gt(0)
     hps_unvis_pos_bool = hps_unvis_pos.gt(0)
     vis_obj_num = hps_vis_pos_bool.sum()
@@ -161,7 +162,6 @@ def hps_cyc3_loss(pred_coord, pred_conf, gt, hps_pos, hps_vis_pos, hps_unvis_pos
         loss_coord = loss_coord / (mask_xy_1.sum() + 1e-4)
         ##############################
         # kps vis conf loss
-        hps_conf_pos_bool = hps_pos[:, [0, 2, 4], :, :].gt(0)
         gt_vis_1 = torch.cat([mask_x1, mask_x2, mask_x3], axis=1)
         gt_vis_2 = torch.cat([mask_x2, mask_x3, mask_x1], axis=1)
         gt_vis_3 = torch.cat([mask_x3, mask_x1, mask_x2], axis=1)
@@ -224,6 +224,7 @@ def hps_cyc3_loss(pred_coord, pred_conf, gt, hps_pos, hps_vis_pos, hps_unvis_pos
 
 def hps_cyc2_loss(pred_coord, pred_conf, gt, hps_pos, hps_vis_pos, hps_unvis_pos):
     hps_coord_pos_bool = hps_pos.gt(0)
+    hps_conf_pos_bool = hps_pos[:, [0, 2], :, :].gt(0)
     hps_vis_pos_bool = hps_vis_pos.gt(0)
     hps_unvis_pos_bool = hps_unvis_pos.gt(0)
     vis_obj_num = hps_vis_pos_bool.sum()
@@ -287,7 +288,6 @@ def hps_cyc2_loss(pred_coord, pred_conf, gt, hps_pos, hps_vis_pos, hps_unvis_pos
         loss_coord = loss_coord / (mask_xy_1.sum() + 1e-4)
         ##############################
         # kps vis conf loss
-        hps_conf_pos_bool = hps_pos[:, [0, 2], :, :].gt(0)
         gt_vis_1 = torch.cat([mask_x1, mask_x2], axis=1)
         gt_vis_2 = torch.cat([mask_x2, mask_x1], axis=1)
 
