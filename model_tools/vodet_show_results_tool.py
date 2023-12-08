@@ -15,6 +15,7 @@ color_list = np.array(
         [218, 112, 214],
     ], dtype=np.int
 )
+font = cv2.FONT_HERSHEY_SIMPLEX
 
 
 def ctdet_show_result(data_args, image, results, bbox_thresh, show_txt):
@@ -56,7 +57,6 @@ def multi_show_result(data_args, image, results, bbox_thresh, pt_thresh, show_tx
                     txt = '{}'.format(data_args['class_names'][i])
                     num_x, num_y = str(conf).split('.')
                     txt = txt + '_' + str(num_x) + '.' + str(num_y[0])
-                    font = cv2.FONT_HERSHEY_SIMPLEX
                     cat_size = cv2.getTextSize(txt, font, 0.5, 1)[0]
 
                     cv2.rectangle(image, (bbox[0], bbox[1] - cat_size[1] - 2), (bbox[0] + cat_size[0], bbox[1] - 2), c,
